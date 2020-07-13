@@ -1,37 +1,29 @@
-version: "3.1"
+version: "3.8"
 services:
   app:
-    restart: always
-    container_name: "app"
     build: .
-    depends_on:
-      - db
-    ports:
-      - "8080:8080" # When you use HTTP
-    networks:
-      - backend
+    restart: unless-stopped
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=docker
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
 
-  db:
-    restart: always
-    image: "mysql:5.7.10"
-    container_name: "db"
+  postgres:
+    image: "postgres:latest"
+    container_name: "postgres"
+    expose:
+      - 5432
     ports:
-      - "3306:3306"
+      - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: "admin"
-      MYSQL_USER: "test"
-      MYSQL_PASSWORD: "test"
-      MYSQL_DATABASE: "test"
-    networks:
-      - backend
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=testdb
+    restart: unless-stopped
     volumes:
-      - mysql-db:/data/db
+      - postgres-data:/var/lib/postgresql/data
 
-networks:
-  backend:
-    driver: bridge
-# Names our volume
 volumes:
-  mysql-db:
+  postgres-data:
